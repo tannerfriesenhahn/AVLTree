@@ -21,6 +21,25 @@ class BTree{
             else if (key > node->key){
                 node->right = helperInsert(node->right, key);
             }
+            updateHeight(node);
+            int balance = getBalance(node);
+            if(balance > 1){
+                if(getBalance(node->left) >= 0){
+                    return rightRotate(node);
+                }else if(getBalance(node->left) < 0){
+                    node->left = leftRotate(node->left);
+                    return rightRotate(node);
+                }
+            }
+            else if(balance < -1){
+                if(getBalance(node->right) <= 0){
+                    return leftRotate(node);
+                }
+                else if(getBalance(node->right) > 0){
+                    node->right = rightRotate(node->right);
+                    return leftRotate(node);
+                }
+            }
             return node;
 
         }
@@ -84,26 +103,49 @@ class BTree{
 
                     node->key = successorNode->key;
                     node->right = helperRemove(node->right, successorNode->key);
-                    return node;
                 }
             
+            }
+
+            updateHeight(node);
+            int balance = getBalance(node);
+            if(balance > 1){
+                if(getBalance(node->left) >= 0){
+                    return rightRotate(node);
+                }else if(getBalance(node->left) < 0){
+                    node->left = leftRotate(node->left);
+                    return rightRotate(node);
+                }
+            }
+            else if(balance < -1){
+                if(getBalance(node->right) <= 0){
+                    return leftRotate(node);
+                }
+                else if(getBalance(node->right) > 0){
+                    node->right = rightRotate(node->right);
+                    return leftRotate(node);
+                }
             }
             return node;
         }
 
-        int helperHeight(Node* node){
-            if (node == nullptr){
+        int getHeight(Node* node){
+            if(node == nullptr){
                 return -1;
             }
 
-            int leftHeight = helperHeight(node->left);
-            int rightHeight = helperHeight(node->right);
+            return node->height;
+        }
 
-            if (leftHeight > rightHeight){
-                return 1 + leftHeight;
+        void updateHeight(Node* node){
+            int leftHeight = getHeight(node->left);
+            int rightHeight = getHeight(node->right);
+
+            if(leftHeight > rightHeight){
+                node->height = leftHeight + 1;
             }
             else{
-                return 1 + rightHeight;
+                node->height = rightHeight + 1;
             }
         }
 
@@ -119,6 +161,55 @@ class BTree{
                 node = node->left;
             }
             return node->key;
+        }
+
+        int getBalance(Node* node){
+            return getHeight(node->left) - getHeight(node->right);
+        }
+
+        Node* rightRotate(Node* node){
+            Node* x = node->left;
+            Node* T2 = x->right;
+
+            x->right = node;
+
+            node->left = T2;
+
+            updateHeight(node);
+            updateHeight(x);
+
+            return x;
+        }
+
+        Node* leftRotate(Node* node){
+            Node* x = node->right;
+            Node* T2 = x->left;
+
+            x->left = node;
+            node->right = T2;
+
+            updateHeight(node);
+            updateHeight(x);
+
+            return x;
+        }
+
+        void helperPrint(Node* node, int space) {
+            if (node == nullptr)
+                return;
+
+            const int indent = 6;
+
+            space += indent;
+            
+            helperPrint(node->right, space);
+
+            std::cout << std::endl;
+            for (int i = indent; i < space; i++)
+                std::cout << " ";
+            std::cout << node->key << "(" << node->height << ")" << std::endl;
+
+            helperPrint(node->left, space);
         }
 
         void helperClear(Node* node){
@@ -151,11 +242,11 @@ class BTree{
         }
 
         void remove(int key){
-            helperRemove(root, key);
+            root = helperRemove(root, key);
         }
 
         int height(){
-            return helperHeight(root);
+            return getHeight(root);
         }
 
         int getMax(){
@@ -170,6 +261,10 @@ class BTree{
                 throw std::runtime_error("Tree is empty");
             }
             return helperMin(root);
+        }
+
+        void printTree() {
+            helperPrint(root, 0);
         }
 
         void clear(){

@@ -9,7 +9,12 @@ int main(){
     tree.insert(60);
     tree.insert(55);
 
-    tree.inOrderTraversal();
+    tree.printTree();
+
+    tree.remove(20);
+
+    tree.printTree();
+
 
     return 0;
 }

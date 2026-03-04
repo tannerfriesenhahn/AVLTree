@@ -11,7 +11,7 @@ class Node{
             key = nkey;
             left = nullptr;
             right = nullptr;
-            height = 1;
+            height = 0;
         }
 
 };
